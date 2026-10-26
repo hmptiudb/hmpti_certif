@@ -1,0 +1,451 @@
+@extends('layouts.admin-layout')
+
+@section('title', 'Review Claim')
+
+@section('content')
+<style>
+    .main {
+        padding: 48px 40px 80px;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 32px;
+    }
+
+    .page-title {
+        font-family: 'Fraunces', serif;
+        font-size: 32px;
+        font-weight: 300;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+    }
+
+    .back-link {
+        font-size: 13px;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Sections */
+    .sections {
+        display: grid;
+        gap: 24px;
+    }
+
+    .section {
+        background: var(--card);
+        border: 1px solid rgba(0,0,0,0.07);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+    }
+
+    .section-title {
+        font-family: 'Fraunces', serif;
+        font-size: 20px;
+        font-weight: 300;
+        color: var(--ink);
+        margin-bottom: 20px;
+        letter-spacing: -0.01em;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 12px;
+        color: var(--ink-muted);
+        margin-bottom: 6px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .info-value {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink);
+    }
+
+    .status-value {
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .status-value.pending {
+        color: #854D0E;
+    }
+
+    .status-value.other {
+        color: var(--ink-mid);
+    }
+
+    /* Proof Link */
+    .proof-link {
+        font-size: 13px;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+        margin-top: 8px;
+        display: inline-block;
+    }
+
+    .proof-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Actions */
+    .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--ink);
+        color: #FFFFFF;
+        font-family: 'Geist', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 12px 24px;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        transition: background 0.2s, transform 0.1s;
+        letter-spacing: 0.01em;
+        border: none;
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        background: #2A2821;
+    }
+
+    .action-btn:active {
+        transform: scale(0.98);
+    }
+
+    .action-btn.approve {
+        background: var(--accent);
+    }
+
+    .action-btn.approve:hover {
+        background: var(--accent-mid);
+    }
+
+    .action-btn.reject {
+        background: var(--danger);
+    }
+
+    .action-btn.reject:hover {
+        background: #6D2213;
+    }
+
+    /* Reject Form */
+    .reject-form {
+        background: var(--danger-lt);
+        border: 1px solid rgba(140,44,26,0.15);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-top: 20px;
+    }
+
+    .reject-form-title {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--danger);
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink-mid);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-input {
+        font-family: 'Geist', sans-serif;
+        font-size: 14px;
+        color: var(--ink);
+        background: var(--card);
+        border: 1px solid rgba(0,0,0,0.12);
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        width: 100%;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--danger);
+        box-shadow: 0 0 0 3px rgba(140,44,26,0.1);
+    }
+
+    textarea.form-input {
+        resize: none;
+        min-height: 100px;
+    }
+
+    .action-form {
+        display: inline;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    .action-btn.warning {
+        background: #92400E;
+    }
+
+    .action-btn.warning:hover {
+        background: #6B2D0A;
+    }
+
+    /* Rejection Info Box */
+    .rejection-info {
+        background: var(--danger-lt);
+        border: 1px solid rgba(140,44,26,0.15);
+        border-left: 3px solid var(--danger);
+        border-radius: var(--radius-md);
+        padding: 16px 20px;
+    }
+
+    .rejection-info-label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--danger);
+        margin-bottom: 8px;
+    }
+
+    .rejection-info-text {
+        font-size: 14px;
+        color: var(--danger);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    @media (max-width: 640px) {
+        .main { padding: 32px 20px 60px; }
+        .section { padding: 20px; }
+        .page-title { font-size: 26px; }
+        .info-grid { grid-template-columns: 1fr; }
+        .actions { flex-direction: column; }
+        .action-btn { width: 100%; justify-content: center; }
+    }
+</style>
+
+<main class="main">
+
+    <div class="page-header">
+        <h1 class="page-title">Review Claim</h1>
+        @if($certificate->status === 'rejected')
+            <a href="{{ route('admin.rejected') }}" class="back-link">Back to Rejected</a>
+        @else
+            <a href="{{ route('admin.pending') }}" class="back-link">Back to Pending</a>
+        @endif
+    </div>
+
+    <div class="sections">
+
+        <div class="section">
+            <h2 class="section-title">Personal Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Name</span>
+                    <span class="info-value">{{ $certificate->name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ $certificate->email }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Event</span>
+                    <span class="info-value">{{ $certificate->event }}</span>
+                </div>
+            </div>
+        </div>
+
+        @if($certificate->message || $certificate->next_event)
+        <div class="section">
+            <h2 class="section-title">Feedback & Suggestions</h2>
+            @if($certificate->message)
+            <div class="info-item" style="margin-bottom: 16px;">
+                <span class="info-label">Pesan dan Kesan</span>
+                <span class="info-value">{{ $certificate->message }}</span>
+            </div>
+            @endif
+            @if($certificate->next_event)
+            <div class="info-item">
+                <span class="info-label">Event Selanjutnya yang Diinginkan</span>
+                <span class="info-value">{{ $certificate->next_event }}</span>
+            </div>
+            @endif
+        </div>
+        @endif
+
+        <div class="section">
+            <h2 class="section-title">Claim Details</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Submitted</span>
+                    <span class="info-value">{{ $certificate->created_at->format('d F Y, H:i') }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <span class="status-value {{ $certificate->status === 'pending' ? 'pending' : 'other' }}">
+                        {{ $certificate->status }}
+                    </span>
+                </div>
+            </div>
+            @if($certificate->proof_file)
+                <div style="margin-top: 16px;">
+                    <span class="info-label">Proof File</span>
+                    <a href="{{ asset('storage/' . $certificate->proof_file) }}" target="_blank" class="proof-link">View Proof</a>
+                </div>
+            @endif
+            @if($certificate->attendance_photo)
+                <div style="margin-top: 16px;">
+                    <span class="info-label">Attendance Photo</span>
+                    <div style="margin-top:8px;">
+                        <a href="{{ asset('storage/' . $certificate->attendance_photo) }}" target="_blank" class="proof-link">View Full Photo</a>
+                    </div>
+                    <img src="{{ asset('storage/' . $certificate->attendance_photo) }}" alt="Attendance Proof" style="max-width:100%; max-height:300px; border-radius:8px; margin-top:12px; border:1px solid rgba(0,0,0,0.1);" />
+                </div>
+            @endif
+            @if($certificate->payment_proof)
+                <div style="margin-top: 16px;">
+                    <span class="info-label">Payment Proof</span>
+                    <div style="margin-top:8px;">
+                        <a href="{{ asset('storage/' . $certificate->payment_proof) }}" target="_blank" class="proof-link">View Full File</a>
+                    </div>
+                    @if(in_array(strtolower(pathinfo($certificate->payment_proof, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png']))
+                        <img src="{{ asset('storage/' . $certificate->payment_proof) }}" alt="Payment Proof" style="max-width:100%; max-height:300px; border-radius:8px; margin-top:12px; border:1px solid rgba(0,0,0,0.1);" />
+                    @endif
+                </div>
+            @endif
+
+            {{-- ── Google Drive Link ── --}}
+            @if($certificate->google_drive_file_id)
+                <div style="margin-top:20px; padding-top:16px; border-top:1px solid rgba(0,0,0,0.06);">
+                    <span class="info-label">Google Drive</span>
+                    <div style="margin-top:8px;">
+                        <a href="https://drive.google.com/file/d/{{ $certificate->google_drive_file_id }}/view"
+                           target="_blank"
+                           style="display:inline-flex; align-items:center; gap:7px; background:#1a73e8; color:#fff; font-size:13px; font-weight:500; padding:8px 16px; border-radius:8px; text-decoration:none; transition:background 0.2s;"
+                           onmouseover="this.style.background='#1557b0'" onmouseout="this.style.background='#1a73e8'">
+                            <svg width="14" height="14" viewBox="0 0 87.3 78" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                                <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                                <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
+                                <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
+                                <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                                <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+                                <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+                            </svg>
+                            Lihat di Google Drive ↗
+                        </a>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        @if($certificate->status === 'pending')
+            <div class="actions">
+                <form action="{{ route('admin.approve', $certificate->id) }}" method="POST" class="action-form">
+                    @csrf
+                    <button type="submit" class="action-btn approve">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        Approve
+                    </button>
+                </form>
+                <button onclick="document.getElementById('rejectForm').classList.toggle('hidden')" class="action-btn reject">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    Reject
+                </button>
+            </div>
+
+            <div id="rejectForm" class="reject-form hidden">
+                <h3 class="reject-form-title">Reject Claim</h3>
+                <form action="{{ route('admin.reject', $certificate->id) }}" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="rejection_reason" class="form-label">Rejection Reason</label>
+                        <button type="button" onclick="document.getElementById('rejection_reason').value = 'Data not found in attendance records or not present at the event'" class="proof-link" style="margin-bottom: 8px; font-size: 12px;">
+                            + Quick add: Not found in attendance / not present
+                        </button>
+                        <textarea name="rejection_reason" id="rejection_reason" rows="4" class="form-input" required></textarea>
+                    </div>
+                    <button type="submit" class="action-btn reject">
+                        Confirm Rejection
+                    </button>
+                </form>
+            </div>
+        @endif
+
+        @if($certificate->status === 'rejected')
+            <div class="section" style="border-color: rgba(140,44,26,0.15);">
+                <h2 class="section-title" style="color: var(--danger);">Rejection Details</h2>
+                <div class="rejection-info">
+                    <p class="rejection-info-label">Rejection Reason</p>
+                    <p class="rejection-info-text">{{ $certificate->rejection_reason }}</p>
+                </div>
+                @if($certificate->approved_by)
+                <p style="font-size:13px;color:var(--ink-muted);margin-top:12px;margin-bottom:0;">
+                    Rejected by <strong style="color:var(--ink-mid);">{{ $certificate->approved_by }}</strong>
+                    @if($certificate->approved_at)
+                        on {{ $certificate->approved_at->format('d F Y, H:i') }}
+                    @endif
+                </p>
+                @endif
+            </div>
+
+            <div class="actions">
+                <form action="{{ route('admin.reset-to-pending', $certificate->id) }}" method="POST" class="action-form"
+                      onsubmit="return confirm('Reset this claim to pending? The user will be notified by email.');">
+                    @csrf
+                    <button type="submit" class="action-btn warning">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                        </svg>
+                        Allow Re-claim
+                    </button>
+                </form>
+            </div>
+        @endif
+
+    </div>
+
+</main>
+@endsection
