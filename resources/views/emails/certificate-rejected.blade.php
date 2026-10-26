@@ -16,7 +16,7 @@
     <!-- Brand -->
     <tr>
       <td align="center" style="padding-bottom:18px;">
-        <span style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8E8E93;">KEVIENSTUDIO.MY.ID</span>
+        <span style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8E8E93;">KEPIN17</span>
       </td>
     </tr>
 
@@ -132,7 +132,7 @@
             <td style="background:#F2F3F5;border-top:1px solid #E5E5EA;border-radius:0 0 24px 24px;padding:16px 30px;text-align:center;">
               <p style="font-size:11px;color:#AEAEB2;line-height:1.7;margin:0;">
                 You received this email because a certificate was claimed under your account.<br>
-                &copy; {{ date('Y') }} kevienstudio.my.id &middot; All rights reserved.
+                &copy; {{ date('Y') }} Kepin17 &middot; All rights reserved.
               </p>
             </td>
           </tr>

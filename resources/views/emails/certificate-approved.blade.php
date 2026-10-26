@@ -87,7 +87,7 @@
         <tr>
             <td align="center" style="padding-bottom:20px;">
                 <span style="font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#8E8E93;">
-                    KEVIENSTUDIO.MY.ID · CERTIFICATE SYSTEM
+                    KEPIN17 · CERTIFICATE SYSTEM
                 </span>
             </td>
         </tr>
@@ -288,7 +288,7 @@
                         <td style="background:#F7F7F8;border-top:1px solid #E5E5EA;padding:18px 40px;text-align:center;">
                             <p style="margin:0;font-size:11px;line-height:1.75;color:#AEAEB2;">
                                 Email ini dikirim secara otomatis oleh sistem sertifikasi.<br>
-                                © {{ date('Y') }} kevienstudio.my.id · All rights reserved.
+                                © {{ date('Y') }} Kepin17 · All rights reserved.
                             </p>
                         </td>
                     </tr>

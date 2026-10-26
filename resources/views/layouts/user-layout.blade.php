@@ -689,7 +689,7 @@
             <div class="footer-logo">Certificate Claim</div>
             <div class="footer-right">
                 <span class="footer-copyright">© {{ date('Y') }} Certificate Claim System</span>
-                <span class="footer-support">Support by <a href="https://kevienstudio.my.id" target="_blank">kevienstudio.my.id</a></span>
+                <span class="footer-support">Support by <a href="https://github.com/Kepin17" target="_blank">Kepin17</a></span>
             </div>
         </div>
     </footer>

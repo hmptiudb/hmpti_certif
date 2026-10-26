@@ -374,7 +374,7 @@
                 © {{ date('Y') }} Certificate Claim System
             </div>
             <div class="footer-support">
-                Support by <a href="https://kevienstudio.my.id" target="_blank">kevienstudio.my.id</a>
+                Support by <a href="https://github.com/Kepin17" target="_blank">Kepin17</a>
             </div>
         </div>
     </footer>

@@ -1,262 +1,101 @@
-# Certificate Claim System
+# Sistem Klaim Sertifikat HMPTI
 
-A modern Laravel-based certificate management and verification system with OTP authentication, event management, and secure certificate generation.
+Aplikasi web (Laravel 11) untuk mengelola penerbitan sertifikat kegiatan HMPTI: peserta mengklaim sertifikat, panitia/admin memverifikasi, lalu sertifikat PDF dibuat otomatis, dikirim lewat email, dan bisa diverifikasi keasliannya.
 
-## Features
+## Kenapa dipakai di HMPTI
 
-### For Users
-- **Event Browsing**: View available events and certificate programs
-- **Certificate Claiming**: Claim certificates for events attended
-- **Status Tracking**: Track certificate approval status in real-time
-- **Certificate Verification**: Verify certificate authenticity via certificate number
-- **Certificate Download**: Download generated certificates in PDF format
+| Kebutuhan | Fitur |
+|---|---|
+| Banyak kegiatan (seminar, workshop, lomba, dll.) | Satu sistem, banyak event, template & penomoran sertifikat per event |
+| Panitia tidak perlu kirim sertifikat satu-satu | Bulk approve, generate otomatis, email otomatis, kirim massal via import Excel |
+| Mencegah klaim palsu | Wajib login, bukti kehadiran & bukti pembayaran (opsional per event), anti-duplikat, batas waktu klaim |
+| Sertifikat harus bisa dicek keasliannya | Halaman verifikasi berdasarkan nomor sertifikat |
+| Pergantian kepengurusan | Akun admin bertingkat (superadmin / admin), aktif/nonaktif, log aktivitas |
+| Arsip | Upload otomatis ke Google Drive per folder event, unduh semua sertifikat event sebagai ZIP |
 
-### For Administrators
-- **Dashboard**: Overview of pending, generated, rejected stats and quick actions
-- **Event Management**: Create, edit, and manage certificate events with optional certificate number prefix
-- **Pending Claims by Event**: Review pending claims grouped and categorized by event
-- **Rejected Claims by Event**: View rejected claims grouped and categorized by event
-- **Generated Certificates by Event**: Browse generated certificates grouped by event
-- **Certificate Approval**: Review and approve/reject claims with quick-select rejection reasons
-- **Bulk Approve/Reject**: Select multiple pending claims and approve or reject them in one action
-- **Allow Re-claim**: Reset a rejected claim back to pending and notify the user via email
-- **Activity Log**: Full history of all admin actions (approved, rejected, reset, regenerated, etc.)
-- **Global Search**: Search all claims by name, email, certificate number, or event from the navbar
-- **Export CSV**: Download claim lists per event and status as CSV files
-- **Claim Deadline per Event**: Set a deadline date/time after which the claim form auto-closes
-- **Custom Certificate Templates**: Upload custom certificate templates and overlay settings
-- **Poster Management**: Upload event posters
-- **Certificate Generation**: Generate certificates with customizable templates
-- **OTP Authentication**: Secure two-factor authentication for admin access
-- **Email Notifications**: Automatic email notifications for approvals, rejections, and re-opens
-- **Responsive Navbar**: Mobile-friendly admin navigation with inline search
+## Fitur
 
-## Security Features
+**Peserta**
+- Lihat daftar event aktif, klaim sertifikat lewat `/claim-certificate/{slug}` (wajib login)
+- Lacak status klaim, unduh sertifikat (PDF), dashboard "Sertifikat Saya"
+- Verifikasi sertifikat lewat nomor sertifikat (`/verify`)
+- Lupa password via email
 
-### OTP Authentication
-- Two-factor authentication for admin login
-- 6-digit OTP code sent via email
-- OTP expires after 10 minutes
-- Session-based verification tracking
-- Automatic OTP cleanup after successful verification
+**Admin / Panitia**
+- Login + OTP email (2FA)
+- Dashboard ringkasan: pending, generated, rejected, event
+- Kelola event: template sertifikat, posisi overlay nama & peran, poster, prefix nomor, batas klaim, bukti kehadiran/pembayaran
+- Review klaim: approve / reject (alasan cepat), bulk approve/reject, izinkan klaim ulang
+- Regenerate sertifikat, kirim ulang email, pesan email kustom
+- Import Excel + kirim manual, quick-generate per event, ekspor CSV, unduh ZIP
+- Pencarian global dan log aktivitas admin
+- Manajemen user (khusus superadmin)
 
-### CORS Configuration
-- Restricted CORS to specific origins only
-- Limited allowed methods (GET, POST, PUT, PATCH, DELETE, OPTIONS)
-- Specific allowed headers (Content-Type, X-Requested-With, Authorization, Accept)
-- Preflight request caching (24 hours)
+## Alur singkat
 
-### Additional Security
-- Rate limiting on sensitive endpoints
-- CSRF protection
-- Session management with regeneration
-- Secure password hashing
+```
+Peserta klaim → PENDING → (admin approve) → GENERATED → email terkirim
+                    └──── (admin reject) → REJECTED → (opsional) reset ke PENDING
+```
 
-## Requirements
+Detail lengkap: [Panduan Admin](docs/PANDUAN-ADMIN.md) · [Arsitektur](docs/ARSITEKTUR.md) · [Deployment](docs/DEPLOYMENT.md) · [Kontribusi](docs/KONTRIBUSI.md)
 
-- PHP >= 8.2
-- Composer
-- MySQL >= 5.7 or MariaDB >= 10.3
-- Node.js >= 18 (for asset compilation)
+## Kebutuhan sistem
 
-## Installation
+- PHP >= 8.2, Composer
+- MySQL/MariaDB (atau SQLite untuk development)
+- Node.js >= 18
+- SMTP untuk email (OTP & notifikasi)
+- Opsional: Google Cloud service account untuk integrasi Google Drive
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Kepin17/claim-certif-.git
-   cd claim-certif-
-   ```
+## Instalasi cepat
 
-2. **Install dependencies**
-   ```bash
-   composer install
-   npm install
-   ```
+```bash
+git clone https://github.com/Kepin17/claim-certif-.git
+cd claim-certif-
+composer install && npm install
+cp .env.example .env
+php artisan key:generate
+# isi DB_* dan MAIL_* di .env
+php artisan migrate
+php artisan storage:link
+npm run build
+php artisan serve
+php artisan queue:work   # terminal terpisah, wajib untuk generate PDF & email
+```
 
-3. **Environment setup**
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+Buat akun admin pertama (jangan memakai password bawaan seeder di production):
 
-4. **Configure database**
-   
-   Edit `.env` file:
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=your_database_name
-   DB_USERNAME=your_database_username
-   DB_PASSWORD=your_database_password
-   ```
-
-5. **Run migrations**
-   ```bash
-   php artisan migrate
-   ```
-
-6. **Create admin user**
-   ```bash
-   php artisan tinker
-   ```
-   ```php
-   \App\Models\User::create([
-       'name' => 'Admin Name',
-       'email' => 'admin@example.com',
-       'password' => bcrypt('your_password')
-   ]);
-   ```
-
-7. **Configure mail settings**
-   
-   Edit `.env` file for email notifications:
-   ```env
-   MAIL_MAILER=smtp
-   MAIL_HOST=your_smtp_host
-   MAIL_PORT=587
-   MAIL_USERNAME=your_email
-   MAIL_PASSWORD=your_email_password
-   MAIL_ENCRYPTION=tls
-   MAIL_FROM_ADDRESS=your_email@example.com
-   MAIL_FROM_NAME="${APP_NAME}"
-   ```
-
-8. **Compile assets**
-   ```bash
-   npm run build
-   ```
-
-9. **Start development server**
-   ```bash
-   php artisan serve
-   ```
-
-## Configuration
-
-### CORS Configuration
-
-Update `config/cors.php` to add your frontend URL:
+```bash
+php artisan tinker
+```
 ```php
-'allowed_origins' => [
-    'http://your-frontend-domain.com',
-    'https://your-frontend-domain.com',
-],
+\App\Models\User::create(['name' => 'Admin HMPTI', 'email' => 'admin@example.com', 'password' => bcrypt('ganti-password-ini')]);
 ```
 
-### OTP Configuration
+> Role superadmin dan status aktif diatur lewat kolom `role` dan `is_active` pada tabel `users` (lihat [Arsitektur](docs/ARSITEKTUR.md)).
 
-OTP settings are configured in `app/Http/Controllers/Admin/AuthController.php`:
-- OTP length: 6 digits
-- OTP expiry: 10 minutes
-- Email delivery via Laravel Mail
+## Konfigurasi penting (`.env`)
 
-### Certificate Template
+| Variabel | Fungsi |
+|---|---|
+| `APP_NAME`, `APP_URL` | Nama & URL aplikasi (dipakai di email & link) |
+| `DB_*` | Koneksi database |
+| `MAIL_*` | SMTP untuk OTP, approval, reject, reset password |
+| `QUEUE_CONNECTION=database` | Antrian generate PDF & email |
+| `GOOGLE_DRIVE_ENABLED`, `GOOGLE_DRIVE_ROOT_FOLDER_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON` | Upload otomatis ke Google Drive |
 
-Upload certificate templates in the admin event management:
-- Supported formats: PDF
-- Recommended dimensions: A4 size (210mm x 297mm)
-- Overlay settings for participant name, certificate number, and event details
+## Pengujian
 
-## Usage
-
-### User Flow
-1. Browse available events on the homepage
-2. Click on an event to view details
-3. Fill out the certificate claim form with participant details
-4. Submit for approval
-5. Track certificate status using the certificate number
-6. Download approved certificate from the verification page
-
-### Admin Flow
-1. Login with email and password
-2. Enter OTP code sent to email
-3. Access admin dashboard (shows Pending / Generated / Rejected / Events stats)
-4. Click **Pending** → select event → review individual claims
-5. Use checkboxes to select multiple claims → **Approve Selected** or **Reject Selected** (bulk action)
-6. Or click **Review Claim** on a single claim to approve/reject individually
-7. Certificates are auto-generated and emailed upon approval
-8. Click **Rejected** → select event → optionally click **Allow Re-claim** to reset and notify user
-9. Click **Generated** → select event → view, regenerate, or resend email, or **Export CSV**
-10. Use the **Search** bar in the navbar to find any claim instantly
-11. Check **Activity Log** to audit all admin actions
-12. Manage events (including Claim Deadline) under **Events**
-
-## Project Structure
-
-```
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Admin/
-│   │   │   │   ├── AuthController.php
-│   │   │   │   ├── CertificateAdminController.php
-│   │   │   │   └── EventController.php
-│   │   │   └── CertificateController.php
-│   │   └── Middleware/
-│   │       └── CheckOTPVerification.php
-│   └── Models/
-│       ├── User.php
-│       ├── Certificate.php
-│       └── Event.php
-├── config/
-│   └── cors.php
-├── database/
-│   └── migrations/
-├── resources/
-│   └── views/
-│       ├── admin/
-│       │   ├── dashboard.blade.php
-│       │   ├── pending.blade.php            # Events grid for pending claims
-│       │   ├── pending-by-event.blade.php   # Pending claims list per event
-│       │   ├── rejected.blade.php           # Events grid for rejected claims
-│       │   ├── rejected-by-event.blade.php  # Rejected claims list per event
-│       │   ├── generated.blade.php          # Events grid for generated certs
-│       │   ├── generated-by-event.blade.php # Generated certs list per event
-│       │   ├── show.blade.php               # Review a single claim
-│       │   └── events/
-│       ├── certificates/
-│       │   ├── status.blade.php
-│       │   └── claim.blade.php
-│       ├── emails/
-│       │   ├── certificate-approved.blade.php
-│       │   └── certificate-rejected.blade.php
-│       ├── errors/
-│       │   ├── 403.blade.php
-│       │   ├── 404.blade.php
-│       │   └── 500.blade.php
-│       ├── admin/
-│       │   ├── activity-log.blade.php       # Admin activity log page
-│       │   └── search.blade.php             # Global search results
-│       ├── vendor/pagination/
-│       │   └── tailwind.blade.php           # Custom themed pagination
-│       └── layouts/
-│           ├── admin-layout.blade.php
-│           └── user-layout.blade.php
-└── routes/
-    └── web.php
+```bash
+php artisan test
 ```
 
-## Dependencies
+## Lisensi
 
-### PHP Packages
-- Laravel 11.x
-- pragmarx/google2fa-laravel (for OTP generation)
+MIT.
 
-### Node.js Packages
-- Vite (for asset compilation)
+## Kredit
 
-## License
-
-This project is open-sourced software licensed under the MIT license.
-
-## Support
-
-For support, please contact:
-- Email: support@kevienstudio.my.id
-- Website: https://kevienstudio.my.id
-
-## Credits
-
-- Developed by Kevien Studio
-- Built with Laravel 11
+- Dikembangkan oleh [Kepin17](https://github.com/Kepin17)
+- Dibangun dengan Laravel 11
